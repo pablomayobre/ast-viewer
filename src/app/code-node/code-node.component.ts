@@ -1,9 +1,7 @@
 import { AppService } from './../app.service';
 import { Component, OnInit, Input, ViewEncapsulation, HostBinding, HostListener } from '@angular/core';
 import * as ts from 'typescript';
-import * as _ts from 'typescript-compiler';
 import { ASTNode } from '../app.component';
-// import { isStartOfExpression } from 'typescript';
 
 @Component({
   selector: 'code-node',
