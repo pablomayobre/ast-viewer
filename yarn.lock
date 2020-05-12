@@ -236,6 +236,11 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.150.tgz#649fe44684c3f1fcb6164d943c5a61977e8cf0bd"
   integrity sha512-kMNLM5JBcasgYscD9x/Gvr6lTAv2NVgsKtet/hm93qMyf/D1pt+7jeEZklKJKxMVmXjxbRVQQGfqDSfipYCO6w==
 
+"@types/luaparse@^0.2.6":
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/@types/luaparse/-/luaparse-0.2.6.tgz#d0f25c8fac176204e75421ff7081ce482b3d7933"
+  integrity sha512-C/TORXCQgPwunpAk9ELsbOsR8fX8Vw1Y2yVdlBnC+RPA85iOT00gEZ0AxoXQRVepLwoIfWqA8t2NvnlVs0aPgw==
+
 "@types/node@^6.0.102", "@types/node@^6.0.46":
   version "6.14.10"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-6.14.10.tgz#d9ce598127eb0cc02821476862d11389cb01f6a4"
@@ -4540,6 +4545,11 @@ lru-cache@^4.0.1, lru-cache@^4.1.1, lru-cache@^4.1.2:
   dependencies:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
+
+luaparse@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/luaparse/-/luaparse-0.3.0.tgz#80f8d2161a636dea1fdd39e77996277337df18a1"
+  integrity sha512-hrRXc3QJfZ0BfgOGgNfFaKM01zCjSP2y000WOG4jwl3s06vKzODIfqJ3QKSm64mS52ROpnRnfi756jJbDr59fw==
 
 magic-string@^0.22.3:
   version "0.22.5"

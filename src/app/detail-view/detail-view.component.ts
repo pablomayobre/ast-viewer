@@ -3,7 +3,7 @@ import {
   Input,
   ChangeDetectionStrategy
 } from '@angular/core';
-import * as ts from 'typescript';
+import { RealNode } from 'app/lua';
 
 /**
  * List of properties that the recursion algorithm must not visit
@@ -38,7 +38,7 @@ export class DetailViewComponent {
    * Node whose attributes will be rendered
    */
   @Input()
-  set node(node) {
+  set node(node: RealNode) {
     if (node) {
       const children = this.visitPropNode(node);
       const root: any = {
@@ -48,7 +48,7 @@ export class DetailViewComponent {
           cssClasses: TREE_CSS_CLASSES
         },
         data: {
-          key: ts.SyntaxKind[node.kind]
+          key: node.type
         }
       };
       if (children.length) {
@@ -69,9 +69,10 @@ export class DetailViewComponent {
    * into a more friendly object for the tree rendering
    * @param node - the node to visit
    */
-  visitPropNode(node): any[] {
+  visitPropNode(node: RealNode): any[] {
     const keys = Object.keys(node)
       .filter(key => BLACKLIST.indexOf(key) === -1);
+
     const children = [];
     for (const key of keys) {
       let propValue = node[key];
@@ -81,16 +82,16 @@ export class DetailViewComponent {
           static: true,
           cssClasses: TREE_CSS_CLASSES
         },
-        data: { key }
+        data: { key: key }
       };
-      if (typeof propValue === 'object') {
+      if (propValue !== null && typeof propValue === 'object') {
 
         if (propValue.length) {
           newObj.data.kind = `Array(${propValue.length})`;
           newObj.data.type = 'array';
         }
         if (!isNaN(key as any)) {
-          newObj.data.kind = ts.SyntaxKind[propValue.kind];
+          newObj.data.kind = propValue.type;
         }
         children.push(newObj);
         const _children = this.visitPropNode(propValue);
@@ -103,8 +104,8 @@ export class DetailViewComponent {
           if (typeof propValue === 'string') {
             propValue = `'${propValue}'`;
           }
-          if (key === 'kind') {
-            newObj.data.kind = ts.SyntaxKind[propValue];
+          if (key === 'type') {
+            newObj.data.kind = propValue;
           }
           newObj.data.propValue = propValue;
           children.push(newObj);

@@ -6,7 +6,7 @@ import {
   Output,
   Input
 } from '@angular/core';
-import { CodeSelection } from 'shared/models/code-selection';
+import { CodeSelection, TextPosition } from 'shared/models/code-selection';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -26,7 +26,7 @@ export class EditorViewComponent implements OnInit {
    */
   editorOptions = {
     theme: 'vs-dark',
-    language: 'typescript',
+    language: 'lua',
     minimap: { enabled: false }
   };
 
@@ -78,6 +78,8 @@ export class EditorViewComponent implements OnInit {
   @Input()
   rootNode;
 
+  selection;
+
   /**
    * Stream of code updation events
    */
@@ -89,9 +91,8 @@ export class EditorViewComponent implements OnInit {
   @Input()
   set codeSelection(selection: CodeSelection) {
     if (selection) {
-      const [initRow, initCol] = this.getLineCol(selection.startPos);
-      const [endRow, endCol] = this.getLineCol(selection.endPos);
-      this.selectText(initRow, initCol, endRow, endCol);
+      this.selection = selection;
+      this.selectText();
     }
   }
 
@@ -115,11 +116,14 @@ export class EditorViewComponent implements OnInit {
   onEditorInit(editor: any) {
     this.editor = editor;
 
+    if (this.selection) {
+      this.selectText()
+    }
     // Disabled semantic and syntax validations in Monaco
-    (window as any).monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: true,
-      noSyntaxValidation: true
-    });
+    // (window as any).monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    //   noSemanticValidation: true,
+    //   noSyntaxValidation: true
+    // });
   }
 
   /**
@@ -130,10 +134,13 @@ export class EditorViewComponent implements OnInit {
    * @param endRow - End point row
    * @param endCol - End point column
    */
-  selectText(initRow: number, initCol: number, endRow: number, endCol: number) {
+  selectText() {
+    if (!this.editor || !this.selection) return;
+
+    const init = this.selection.startPos, end = this.selection.endPos
     this.decorations = this.editor.deltaDecorations(this.decorations, [
       {
-        range: new (window as any).monaco.Range(initRow, initCol, endRow, endCol),
+        range: new (window as any).monaco.Range(init.line, init.column + 1, end.line, end.column + 1),
         options: {
           inlineClassName: 'monaco-highlight'
         }
