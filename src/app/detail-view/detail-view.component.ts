@@ -3,7 +3,7 @@ import {
   Input,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { RealNode } from 'app/lua';
+import languages, { languageName } from 'app/language';
 
 /**
  * List of properties that the recursion algorithm must not visit
@@ -27,18 +27,20 @@ const TREE_CSS_CLASSES = {
   styleUrls: ['./detail-view.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DetailViewComponent {
+export class DetailViewComponent<T> {
 
   /**
    * Local cache of the node whose attributes will be rendered
    */
-  private _node;
-
+  private _node: T;
+  
+  @Input()
+  language: languageName
   /**
    * Node whose attributes will be rendered
    */
   @Input()
-  set node(node: RealNode) {
+  set node(node: T) {
     if (node) {
       const children = this.visitPropNode(node);
       const root: any = {
@@ -48,7 +50,7 @@ export class DetailViewComponent {
           cssClasses: TREE_CSS_CLASSES
         },
         data: {
-          key: node.type
+          key: languages[this.language].getKind(node)
         }
       };
       if (children.length) {
@@ -69,7 +71,7 @@ export class DetailViewComponent {
    * into a more friendly object for the tree rendering
    * @param node - the node to visit
    */
-  visitPropNode(node: RealNode): any[] {
+  visitPropNode(node: T): any[] {
     const keys = Object.keys(node)
       .filter(key => BLACKLIST.indexOf(key) === -1);
 
@@ -91,7 +93,7 @@ export class DetailViewComponent {
           newObj.data.type = 'array';
         }
         if (!isNaN(key as any)) {
-          newObj.data.kind = propValue.type;
+          newObj.data.kind = languages[this.language].getKind(propValue);
         }
         children.push(newObj);
         const _children = this.visitPropNode(propValue);

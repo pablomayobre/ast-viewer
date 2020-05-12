@@ -2,14 +2,13 @@ import { CodeSelection } from "shared/models/code-selection";
 import { Ng2TreeSettings } from "shared/tree/tree.types";
 import { AppService } from "./app.service";
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
-import { getChildren, getExtendedChildren, parse, startCode, RealNode } from "./lua";
-
+import languages, { languageName } from './language'
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"],
 })
-export class AppComponent implements OnInit {
+export class AppComponent<T> implements OnInit {
   nodes = {};
 
   @ViewChild("tree")
@@ -27,16 +26,18 @@ export class AppComponent implements OnInit {
 
   monaco = (window as any).monaco;
 
-  nodeList = [] as RealNode[];
+  language: languageName = "typescript";
+
+  nodeList = [] as T[];
   counter = 1;
 
-  selectedNode: RealNode = {} as RealNode;
+  selectedNode: T = {} as T;
 
   astRootNode;
 
   editorRootNode;
 
-  detailNode: RealNode;
+  detailNode: T;
 
   isEditorViewActive = true;
 
@@ -55,7 +56,7 @@ export class AppComponent implements OnInit {
   constructor(private appService: AppService) {}
 
   ngOnInit() {
-    this.initialCode = startCode;
+    this.initialCode = languages[this.language].startCode;
 
     this.appService.setTree(this.tree);
     this.appService.setTreeContainer(this.treeWrapper);
@@ -63,23 +64,23 @@ export class AppComponent implements OnInit {
     this.onCodeUpdate(this.initialCode);
   }
 
-  visit(node: RealNode, extended: boolean): ASTNode {
+  visit(node: T, extended: boolean): ASTNode<T> {
     const children = [];
     if (extended) {
-      getExtendedChildren(node).forEach((_node) => {
+      languages[this.language].getExtendedChildren(node).forEach((_node) => {
         if (!_node) return;
         children.push(this.visit(_node, extended));
       });
     } else {
-      getChildren(node).forEach((_node) => {
+      languages[this.language].getChildren(node).forEach((_node) => {
         if (!_node) return;
         children.push(this.visit(_node, extended));
       });
     }
 
     this.nodeList.push(node);
-    const obj: ASTNode = {
-      value: node.type,
+    const obj: ASTNode<T> = {
+      value: languages[this.language].getKind(node),
       id: this.counter++,
       realNode: node,
       settings: {
@@ -114,16 +115,13 @@ export class AppComponent implements OnInit {
   }
 
   private getRootFromCode(code: string, extended: boolean) {
-    const a = parse(code);
+    const a = languages[this.language].parse(code);
     return this.visit(a, extended);
   }
 
   onASTNodeHover(evt) {
     this.selectedNode = this.nodeList[evt.node.id - 1];
-    this.codeSelection = {
-      startPos: this.selectedNode.loc.start,
-      endPos: this.selectedNode.loc.end,
-    };
+    this.codeSelection = languages[this.language].getSelection(this.selectedNode);
   }
 
   onASTNodeClick(evt) {
@@ -157,10 +155,10 @@ export class AppComponent implements OnInit {
   }
 }
 
-export interface ASTNode {
+export interface ASTNode<T> {
   value: string;
-  children?: ASTNode[];
+  children?: ASTNode<T>[];
   id: number;
   settings: any;
-  realNode: RealNode;
+  realNode: T;
 }

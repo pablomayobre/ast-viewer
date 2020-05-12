@@ -1,21 +1,16 @@
-import { Subject } from 'rxjs/Subject';
-import {
-  Component,
-  OnInit,
-  EventEmitter,
-  Output,
-  Input
-} from '@angular/core';
-import { CodeSelection, TextPosition } from 'shared/models/code-selection';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from "rxjs/Subject";
+import { Component, OnInit, EventEmitter, Output, Input } from "@angular/core";
+import { CodeSelection } from "shared/models/code-selection";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { AppService } from "app/app.service";
+import languages, { languageName } from "app/language";
 
 @Component({
-  selector: 'app-editor-view',
-  templateUrl: './editor-view.component.html',
-  styleUrls: ['./editor-view.component.scss']
+  selector: "app-editor-view",
+  templateUrl: "./editor-view.component.html",
+  styleUrls: ["./editor-view.component.scss"],
 })
-export class EditorViewComponent implements OnInit {
-
+export class EditorViewComponent<T> implements OnInit {
   /**
    * Whether or not the monaco editor is active
    */
@@ -24,11 +19,7 @@ export class EditorViewComponent implements OnInit {
   /**
    * Options for the Monaco editor
    */
-  editorOptions = {
-    theme: 'vs-dark',
-    language: 'lua',
-    minimap: { enabled: false }
-  };
+  editorOptions;
 
   /**
    * Reference to the Monaco editor instance
@@ -78,6 +69,10 @@ export class EditorViewComponent implements OnInit {
   @Input()
   rootNode;
 
+
+  @Input()
+  language: languageName;
+
   selection;
 
   /**
@@ -96,17 +91,22 @@ export class EditorViewComponent implements OnInit {
     }
   }
 
+  constructor (private appService: AppService) {}
+
   ngOnInit() {
     this.code = this.initialCode;
     this.cacheLines(this.code);
     this.codeUpdate$
-      .pipe(
-        debounceTime(500),
-        distinctUntilChanged()
-      )
-      .subscribe(code => {
+      .pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe((code) => {
         this.codeUpdate.next(code);
       });
+    
+    this.editorOptions = {
+      theme: "vs-dark",
+      language: languages[this.language].language,
+      minimap: { enabled: false },
+    }
   }
 
   /**
@@ -117,13 +117,10 @@ export class EditorViewComponent implements OnInit {
     this.editor = editor;
 
     if (this.selection) {
-      this.selectText()
+      this.selectText();
     }
-    // Disabled semantic and syntax validations in Monaco
-    // (window as any).monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-    //   noSemanticValidation: true,
-    //   noSyntaxValidation: true
-    // });
+    
+    languages[this.language].onEditorInit((window as any).monaco)
   }
 
   /**
@@ -137,13 +134,19 @@ export class EditorViewComponent implements OnInit {
   selectText() {
     if (!this.editor || !this.selection) return;
 
-    const init = this.selection.startPos, end = this.selection.endPos
+    const init = this.selection.startPos,
+      end = this.selection.endPos;
     this.decorations = this.editor.deltaDecorations(this.decorations, [
       {
-        range: new (window as any).monaco.Range(init.line, init.column + 1, end.line, end.column + 1),
+        range: new ((window as any).monaco as typeof monaco).Range(
+          init.line,
+          init.column + 1,
+          end.line,
+          end.column + 1
+        ),
         options: {
-          inlineClassName: 'monaco-highlight'
-        }
+          inlineClassName: "monaco-highlight",
+        },
       },
     ]);
   }
@@ -178,7 +181,7 @@ export class EditorViewComponent implements OnInit {
    * @param code - Monaco code
    */
   cacheLines(code: string) {
-    this.cachedLinesLength = code.split('\n').map(l => l.length + 1);
+    this.cachedLinesLength = code.split("\n").map((l) => l.length + 1);
   }
 
   /**
@@ -188,5 +191,4 @@ export class EditorViewComponent implements OnInit {
     this.isEditorEnabled = !this.isEditorEnabled;
     this.viewChange.next(this.isEditorEnabled);
   }
-
 }

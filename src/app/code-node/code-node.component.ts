@@ -8,7 +8,7 @@ import {
   HostListener,
 } from "@angular/core";
 import { ASTNode } from "../app.component";
-import { getFullText, getClass } from "app/lua";
+import languages, { languageName } from "app/language";
 
 @Component({
   selector: "code-node",
@@ -17,9 +17,12 @@ import { getFullText, getClass } from "app/lua";
   encapsulation: ViewEncapsulation.None,
   host: { class: "code-node" },
 })
-export class CodeNodeComponent implements OnInit {
+export class CodeNodeComponent<T> implements OnInit {
   @Input()
-  node: ASTNode;
+  node: ASTNode<T>;
+
+  @Input()
+  language: languageName;
 
   children = [];
 
@@ -51,14 +54,14 @@ export class CodeNodeComponent implements OnInit {
   }
 
   getNodeText() {
-    return getFullText(this.node.realNode).replace(/\n/g, "");
+    return languages[this.language].getFullText(this.node.realNode).replace(/\n/g, "");
   }
 
   getNumNewLines() {
-    return getFullText(this.node.realNode).match(/\n/g) || [];
+    return languages[this.language].getFullText(this.node.realNode).match(/\n/g) || [];
   }
 
   getClass() {
-    return getClass(this.node.realNode)
+    return languages[this.language].getClass(this.node.realNode)
   }
 }
