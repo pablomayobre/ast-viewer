@@ -11,6 +11,8 @@ export type Node = lua.Node | Error
 class Lua implements Language<Node> {
   readonly language = "lua";
 
+  readonly kindKey = "type";
+
   readonly startCode = `local tab = {
   variable = "string",
   method = function (self) print(self.variable) end

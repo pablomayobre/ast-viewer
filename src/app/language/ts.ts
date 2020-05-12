@@ -5,6 +5,8 @@ import { Language } from "./language";
 class TypeScript implements Language<ts.Node> {
   readonly language = "typescript";
 
+  readonly kindKey = "kind";
+
   readonly startCode = `import { Component, OnInit, Input } from '@angular/core';
 
 @Component({

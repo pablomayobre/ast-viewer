@@ -33,7 +33,7 @@ export class DetailViewComponent<T> {
    * Local cache of the node whose attributes will be rendered
    */
   private _node: T;
-  
+
   @Input()
   language: languageName
   /**
@@ -106,8 +106,8 @@ export class DetailViewComponent<T> {
           if (typeof propValue === 'string') {
             propValue = `'${propValue}'`;
           }
-          if (key === 'type') {
-            newObj.data.kind = propValue;
+          if (key === languages[this.language].kindKey) {
+            newObj.data.kind = languages[this.language].getKind(node);
           }
           newObj.data.propValue = propValue;
           children.push(newObj);
