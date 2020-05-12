@@ -39,7 +39,7 @@ export class AppComponent implements OnInit {
     return ts.createSourceFile("_.ts", code, ts.ScriptTarget.Latest, true);
   }
 
-  getFullText(node: ts.Node) {
+  getFullText(node: ts.Node, code: string) {
     return node.getFullText();
   }
 
@@ -68,15 +68,12 @@ export class AppComponent implements OnInit {
   }
 
   getSelection(node: ts.Node): CodeSelection {
-    const model = ((window as any)
-      .monaco as typeof monaco.editor).getModels()[0];
-
-    const start = model.getPositionAt(node.pos);
-    const end = model.getPositionAt(node.end);
+    const start = (window as any).monaco.editor.getModels()[0].getPositionAt(node.pos);
+    const end = (window as any).monaco.editor.getModels()[0].getPositionAt(node.end);
 
     return {
-      startPos: { line: start.lineNumber, column: start.column },
-      endPos: { line: end.lineNumber, column: end.column },
+      startPos: { line: start.lineNumber, column: start.column-1 },
+      endPos: { line: end.lineNumber, column: end.column-1 },
     };
   }
 }

@@ -1,6 +1,6 @@
 <div class="header">
   <h1 class="header__title">Interactive TypeScript AST Viewer</h1>
-  <a href="https://github.com/caroso1222/ast-viewer" target="_blank" class="header__github">GitHub</a>
+  <button (click)="toggleLanguage()" class="header__github">{{language === "lua" ? "TypeScript" : "Lua"}}</button>
 </div>
 <div class="row m-0 main-wrapper">
   <div class="mobile-menu">
@@ -23,10 +23,10 @@
   <div class="col-sm-4 col-xs-12 p-0 panel" [class.panel--active]="activePanel === 'editor'">
     <app-editor-view  (codeUpdate)="onCodeUpdate($event)"
                       (viewChange)="onEditorViewChange($event)"
-                      [initialCode]="initialCode"
                       [rootNode]="editorRootNode"
                       [codeSelection]="codeSelection"
                       [language]="language">
+                  <!--[initialCode]="initialCode"> -->
     </app-editor-view>            
   </div>
   <div class="col-sm-4 col-xs-12 p-0 panel" [class.panel--active]="activePanel === 'nodes'">

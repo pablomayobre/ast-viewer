@@ -100,6 +100,7 @@ tab:method()
         scope: true,
         locations: true,
         luaVersion: "LuaJIT",
+        ranges: true,
       });
     } catch (e) {
       a = {
@@ -118,17 +119,8 @@ tab:method()
     return;
   }
 
-  getFullText(node: lua.Node) {
-    return ((window as any).monaco as typeof monaco.editor)
-      .getModels()[0]
-      .getValueInRange(
-        new ((window as any).monaco as typeof monaco).Range(
-          node.loc.start.line,
-          node.loc.start.column + 1,
-          node.loc.end.line,
-          node.loc.end.column + 1
-        )
-      );
+  getFullText(node: lua.Node, code: string) {
+    return code.substring(...(node as any).range as [number, number])
   }
 
   getKind(node: lua.Node) {
@@ -157,6 +149,6 @@ tab:method()
   }
 }
 
-const luaLanguage = new Lua()
+const luaLanguage = new Lua();
 
 export default luaLanguage;

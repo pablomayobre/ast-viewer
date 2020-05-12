@@ -3,6 +3,7 @@ import { Ng2TreeSettings } from "shared/tree/tree.types";
 import { AppService } from "./app.service";
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import languages, { languageName } from './language'
+import { stringify } from "querystring";
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
@@ -64,22 +65,23 @@ export class AppComponent<T> implements OnInit {
     this.onCodeUpdate(this.initialCode);
   }
 
-  visit(node: T, extended: boolean): ASTNode<T> {
+  visit(node: T, code: string, extended: boolean): ASTNode<T> {
     const children = [];
     if (extended) {
       languages[this.language].getExtendedChildren(node).forEach((_node) => {
         if (!_node) return;
-        children.push(this.visit(_node, extended));
+        children.push(this.visit(_node, code, extended));
       });
     } else {
       languages[this.language].getChildren(node).forEach((_node) => {
         if (!_node) return;
-        children.push(this.visit(_node, extended));
+        children.push(this.visit(_node, code, extended));
       });
     }
 
     this.nodeList.push(node);
     const obj: ASTNode<T> = {
+      code: code,
       value: languages[this.language].getKind(node),
       id: this.counter++,
       realNode: node,
@@ -116,7 +118,7 @@ export class AppComponent<T> implements OnInit {
 
   private getRootFromCode(code: string, extended: boolean) {
     const a = languages[this.language].parse(code);
-    return this.visit(a, extended);
+    return this.visit(a, code, extended);
   }
 
   onASTNodeHover(evt) {
@@ -153,9 +155,18 @@ export class AppComponent<T> implements OnInit {
       this.astRootNode = this.collapsedRootNode;
     }
   }
+
+  toggleLanguage() {
+    this.selectedNode = {} as T;
+    this.detailNode = undefined;
+    this.codeSelection = undefined;
+    this.language = this.language === 'lua' ? 'typescript' : 'lua';
+    this.onCodeUpdate(languages[this.language].startCode)
+  }
 }
 
 export interface ASTNode<T> {
+  code: string;
   value: string;
   children?: ASTNode<T>[];
   id: number;

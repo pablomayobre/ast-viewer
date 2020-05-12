@@ -11,7 +11,7 @@ export interface Language<T> {
 
   parse(code: string): T;
 
-  getFullText(node: T): string;
+  getFullText(node: T, code: string): string;
 
   getKind(node: T): string;
 

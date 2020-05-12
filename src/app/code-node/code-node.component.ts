@@ -22,7 +22,7 @@ export class CodeNodeComponent<T> implements OnInit {
   node: ASTNode<T>;
 
   @Input()
-  language: languageName;
+  language: languageName
 
   children = [];
 
@@ -54,11 +54,11 @@ export class CodeNodeComponent<T> implements OnInit {
   }
 
   getNodeText() {
-    return languages[this.language].getFullText(this.node.realNode).replace(/\n/g, "");
+    return languages[this.language].getFullText(this.node.realNode, this.node.code).replace(/\n/g, "");
   }
 
   getNumNewLines() {
-    return languages[this.language].getFullText(this.node.realNode).match(/\n/g) || [];
+    return languages[this.language].getFullText(this.node.realNode, this.node.code).match(/\n/g) || [];
   }
 
   getClass() {

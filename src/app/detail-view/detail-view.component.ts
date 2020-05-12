@@ -9,7 +9,7 @@ import languages, { languageName } from 'app/language';
  * List of properties that the recursion algorithm must not visit
  * to avoid loops
  */
-const BLACKLIST = ['parent', '_children'];
+const BLACKLIST = ['parent', '_children', 'range'];
 
 /**
  * CSS classes assigned to the prop tree

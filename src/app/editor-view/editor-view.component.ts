@@ -50,12 +50,6 @@ export class EditorViewComponent<T> implements OnInit {
   viewChange: EventEmitter<boolean> = new EventEmitter();
 
   /**
-   * Code to render in component init
-   */
-  @Input()
-  initialCode: string;
-
-  /**
    * A cache used to store the number of characters per line of code.
    * It has the following form:
    * A = [1, 4, 6, 24, 1, 16], where A[i] represents the number of characters
@@ -69,9 +63,19 @@ export class EditorViewComponent<T> implements OnInit {
   @Input()
   rootNode;
 
+  _lang: languageName;
 
   @Input()
-  language: languageName;
+  set language(lang: languageName) {
+    this._lang = lang;
+    this.code = languages[this._lang].startCode
+
+    if (!this.isEditorEnabled) this.switchView();
+  };
+
+  get language () {
+    return this._lang;
+  }
 
   selection;
 
@@ -94,8 +98,7 @@ export class EditorViewComponent<T> implements OnInit {
   constructor (private appService: AppService) {}
 
   ngOnInit() {
-    this.code = this.initialCode;
-    this.cacheLines(this.code);
+    this.code = languages[this._lang].startCode;
     this.codeUpdate$
       .pipe(debounceTime(500), distinctUntilChanged())
       .subscribe((code) => {
@@ -104,7 +107,7 @@ export class EditorViewComponent<T> implements OnInit {
     
     this.editorOptions = {
       theme: "vs-dark",
-      language: languages[this.language].language,
+      language: languages[this._lang].language,
       minimap: { enabled: false },
     }
   }
@@ -120,7 +123,7 @@ export class EditorViewComponent<T> implements OnInit {
       this.selectText();
     }
     
-    languages[this.language].onEditorInit((window as any).monaco)
+    languages[this._lang].onEditorInit((window as any).monaco)
   }
 
   /**
@@ -156,7 +159,6 @@ export class EditorViewComponent<T> implements OnInit {
    * @param code - new code
    */
   onCodeUpdate(code: string) {
-    this.cacheLines(code);
     this.codeUpdate$.next(code);
   }
 
@@ -174,14 +176,6 @@ export class EditorViewComponent<T> implements OnInit {
       pos -= this.cachedLinesLength[i];
     }
     return [0, 0];
-  }
-
-  /**
-   * Updates the lines length cache.
-   * @param code - Monaco code
-   */
-  cacheLines(code: string) {
-    this.cachedLinesLength = code.split("\n").map((l) => l.length + 1);
   }
 
   /**
