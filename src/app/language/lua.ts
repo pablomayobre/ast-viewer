@@ -2,7 +2,13 @@ import * as lua from "luaparse";
 import { CodeSelection } from "shared/models/code-selection";
 import { Language } from "./language";
 
-class Lua implements Language<lua.Node> {
+interface Error extends lua.Base<"Error"> {
+  value: string;
+}
+
+export type Node = lua.Node | Error
+
+class Lua implements Language<Node> {
   readonly language = "lua";
 
   readonly startCode = `local tab = {
@@ -13,7 +19,7 @@ class Lua implements Language<lua.Node> {
 tab:method()
 `;
 
-  getExtendedChildren(node: lua.Node): lua.Node[] {
+  getExtendedChildren(node: Node): Node[] {
     switch (node.type) {
       case "LabelStatement":
       case "GotoStatement":
@@ -69,7 +75,7 @@ tab:method()
     }
   }
 
-  getChildren(node: lua.Node): lua.Node[] {
+  getChildren(node: Node): Node[] {
     switch (node.type) {
       case "IfClause":
       case "ElseifClause":
@@ -91,8 +97,8 @@ tab:method()
     }
   }
 
-  parse(code: string): lua.Node {
-    let a: lua.Node;
+  parse(code: string): Node {
+    let a: Node;
     try {
       a = lua.parse(code, {
         wait: false,
@@ -119,15 +125,15 @@ tab:method()
     return;
   }
 
-  getFullText(node: lua.Node, code: string) {
+  getFullText(node: Node, code: string) {
     return code.substring(...(node as any).range as [number, number])
   }
 
-  getKind(node: lua.Node) {
+  getKind(node: Node) {
     return node.type;
   }
 
-  getClass(node: lua.Node) {
+  getClass(node: Node) {
     switch (node.type) {
       case "StringLiteral":
         return "mtk5";
@@ -141,7 +147,7 @@ tab:method()
     }
   }
 
-  getSelection(node: lua.Node): CodeSelection {
+  getSelection(node: Node): CodeSelection {
     return {
       startPos: node.loc.start,
       endPos: node.loc.end,
